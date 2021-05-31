@@ -1,0 +1,48 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     4.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      Properties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// параметры
+geometry
+{
+    Backpressure 101325.0;
+    Tmin 50.0;
+    deltaTmin 1e-8;
+    Multiplier 1;
+    BreakDown Godunov;  // Accustic - Godunov - Kolgan
+    CameraLength 0.665;
+    CameraDiameter 0.306;
+    TimeKoefficientDetonationPerimeter 0.75; // Коэфициент перед временем, которое необходимо для прохождения ДВ со скоростью Ч-Ж за переметр
+    UseChemistry true;  // Использование химической кинетики в расчетах
+    UseContact false;  // Использование контактной границы в расчетах
+    Tuplayer THE;
+}
+
+// натекание с торца
+butt
+{
+    SstarS 0.5; //0.086956521; // = S*/S
+    Pstar 1013250.0; // = 10atm
+    Tstar 300.0;
+}
+
+// натекание с боковой стенки
+sidewall
+{
+    SstarS 0.5; //0.086956521; // = S*/S
+    Pstar 1013250.0; // = 10atm
+    Tstar 300.0;
+}

@@ -1,0 +1,164 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     4.1;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+thermoType
+{
+    type            heRDEThermo;
+    mixture         RDEMixtureNikolaev;
+    transport       const;
+    thermo          RDEThermo;
+    equationOfState perfectGas;
+    specie          RDEspecie;
+    energy          absoluteEnthalpy;
+}
+
+species
+(
+    H2
+    O2
+    N2
+    Ar
+    H2O
+);
+// параметры термодинамики
+thermo
+{
+    powerN 1.0;
+    //theta 3100;		// эфективная температура возбуждения колебательных степеней мелекул [K]
+    beta 1.5;
+    StartInduction 900.0;	// Температура инициирования первой стадии [K]
+}
+
+// Параметры Чепмена-Жуге
+CJ
+{
+    D 1966.0;       // Скорость детонации Чепмена-Жуге[m/c]
+    P 1580670.0;
+    T 2947.0;
+    Rho 1.7552;
+    MolWeight 24.01;
+    //Kminus 3055;
+}
+
+// Энергия диссоциации веществ в Дж/моль
+
+H2
+{
+    specie
+    {
+        moles 2.0;
+        atoms 2;
+        decomposition 2;
+        molWeight 2.0;          // Молекулярная масса
+        needO 1;                // Количество атомов кислорода, необходимых для полного сжигания этой молекулы
+    	Edissociation -432345.7152;
+        Einduction 71803.62;    // Энергия активации [Дж/моль]
+        Kinduction 5.38e-8;     // Константа активации в моль*с/м3
+	    theta 3000;             // Температура возбуждения колебательных степеней свободы
+    }
+    transport
+    {
+        mu 1.8e-05;
+        Pr 0.7;
+    }
+}
+
+O2
+{
+    specie
+    {
+        moles 1.0;
+        atoms 2;
+        decomposition 2;
+        molWeight 32.0;
+        needO 0;
+    	Edissociation -493929.3564;
+        Einduction 0.0;    // Энергия активации [Дж/моль]
+        Kinduction 0.0;     // Константа активации в моль*с/м3
+        InductionPower 1.0;     // Показатель степени в концентрации(для задержек воспламенения)
+	    theta 1500;		// Температура возбуждения колебательных степеней свободы
+    }
+    transport
+    {
+        mu 1.8e-05;
+        Pr 0.7;
+    }
+}
+
+N2
+{
+    specie
+    {
+        moles 3.7275;
+        atoms 2;
+        decomposition 1;
+        molWeight 28.0;
+        needO 0;
+	    Edissociation 0.0;
+        Einduction 0.0;		// Энергия активации [Дж/моль]
+        Kinduction 0.0;		// Константа активации в моль*с/м3
+	    theta 3000;		// Температура возбуждения колебательных степеней свободы
+    }
+    transport
+    {
+        mu 1.8e-05;
+        Pr 0.7;
+    }
+}
+
+Ar
+{
+    specie
+    {
+        moles 0.0445;
+        atoms 1;
+        decomposition 1;
+        molWeight 40.0;
+        needO 0;
+        Edissociation 0.0;
+        Einduction 0.0;		// Энергия активации [Дж/моль]
+        Kinduction 0.0;		// Константа активации в моль*с/м3
+	theta 0;		// Температура возбуждения колебательных степеней свободы
+    }
+    transport
+    {
+        mu 1.8e-05;
+        Pr 0.7;
+    }
+}
+
+H2O
+{
+    specie
+    {
+        moles 0.0;
+        atoms 3;
+        decomposition 3;
+        molWeight 36.0;
+        needO 0;
+        Edissociation -918420.6;
+        Einduction 0.0;    // Энергия активации [Дж/моль]
+        Kinduction 0.0;     // Константа активации в моль*с/м3
+	    theta 3500;		// Температура возбуждения колебательных степеней свободы
+    }
+    transport
+    {
+        mu 1.8e-05;
+        Pr 0.7;
+    }
+}

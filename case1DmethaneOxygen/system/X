@@ -1,0 +1,28 @@
+set terminal wxt size 1600,600 font "arial,18"
+#----------------------------------------------------
+set title "Зависимость положения пика Неймана от времени"
+set grid
+set key top right
+
+# X
+set xlabel "t, ms" font ",18"
+set xrange [0.1:]
+
+# Y
+set ylabel "X, persent" font ",18"
+set format y "%2.2f"
+#set yrange [0:2.5]
+
+#set format y '%.0s✕10^{%S}'
+
+
+set pointsize 2
+set style line 5 lt rgb "cyan" lw 3 pt 6
+set style function linespoints
+set style line 1 linetype 1 linecolor rgb "black"
+
+
+plot "../data.dat" using ($1*1000.0):($2) title "" with points pointtype 7 ps 1 linecolor "black" linewidth 2
+
+#pause -1
+pause mouse
