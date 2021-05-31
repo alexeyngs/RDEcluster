@@ -1,0 +1,11 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+set -x
+
+module purge
+module load intel/2017.4.196 parallel/mpi.intel.broadwell/2017.4.196 compilers/intel/2017.4.196
+#module load intel/2019/compiles intel/2019/mpi
+
+wmake libso ./solverBC
+wmake ./solver
+wmake ./solverARRAYboost
