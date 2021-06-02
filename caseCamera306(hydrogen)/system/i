@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3600,1200 font "arial,20"
 #----------------------------------------------------
 set title "Усредненный удельный импульс на выходе из камеры сгорания от времени"
 set grid
@@ -10,7 +10,7 @@ set xlabel "t, мсек" font ",18"
 
 # Y
 set ylabel "I, кг/м/с2/1000" font ",18"
-set format y "%2.2f"
+set format y "%2.0f"
 set yrange [-1:] 
 #set format y '%.0s✕10^{%S}' 
 

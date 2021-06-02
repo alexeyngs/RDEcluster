@@ -26,9 +26,8 @@ public:
     const ThermoType & patchFaceMixture(const label patchi, const label facei) const;
     const ThermoType & patchFaceT(scalar & Tout, const label patchi, const label facei, const scalar Hpotential, const scalar rho, const scalar Pav) const;
     ChemistryElement GetFromHchemical(const ChemistryElement & old, scalar Hchemical)const;
-    ChemistryElement CorrectElementAndT(const ThermoType & mixture, const ChemistryElement & old, const scalar Hpotential, const scalar rho, const scalar Pav, const scalar Tav, scalar & Tout)const;
 
-    void SetWeightAndT(const ThermoType & mixture, const scalar Hpotential, const scalar rho, const scalar Pav, scalar molWeight, const scalar Induction, scalar & molWeightout, scalar & Tout)const;
+    void SetWeightAndT(const ThermoType & mixture, const scalar Hpotential, const scalar rho, const scalar Pav, scalar & Induction, scalar & MolWeight, scalar & T)const;
     void Chemistry(const label celli, const scalar rho, const scalar T);
     void CorrectChemistry(ChemistryElement & Element)const;
     scalar InletButtMolWeight(const label patchi, const label facei, const ThermoType & mixture) const;
@@ -148,10 +147,10 @@ const ThermoType & Foam::RDEMixtureExtension<ThermoType>::Mixture(const Chemistr
     mixture.Mixture = const_cast<Foam::IMixture*>(dynamic_cast<const Foam::IMixture*>(this));
     mixture.Einduction_ = this->Einduction;
     mixture.Kinduction_ = this->Kinduction;
-    // Получение необходимого - Edissociation - molWeight - Hchemical
+    // Получение необходимого - Edissociation - Hchemical - MolWeight
     mixture.Edissociation_ = this->Edissociation;
-    mixture.MolWeight_ = MolWeight;
     mixture.Hchemical_ = Hchemical(Induction, MolWeight);
+	mixture.MolWeight_ = MolWeight;
     return mixture;
 }
 
@@ -161,32 +160,37 @@ const ThermoType & Foam::RDEMixtureExtension<ThermoType>::cellMixture(const labe
     // mixture - одна универсальная переменная
     const ThermoType & mixture = Foam::multiComponentMixture<ThermoType>::cellMixture(celli);
     // Induction - индукция масса текущей ячейки
-    const Foam::scalar Induction = dynamic_cast<const Foam::volScalarField::FieldType &> (this->Induction_.primitiveField()) [celli];
+	Foam::scalar & Induction = const_cast<Foam::volScalarField::FieldType &> (dynamic_cast<const Foam::volScalarField::FieldType &> (this->Induction_.primitiveField())) [celli];
+    // MolWeight - молекулярная масса текущей ячейки
+    Foam::scalar & MolWeight = const_cast<Foam::volScalarField::FieldType &> (dynamic_cast<const Foam::volScalarField::FieldType &> (this->MolWeight_.primitiveField())) [celli];
+	
     mixture.Mixture = const_cast<Foam::IMixture*>(dynamic_cast<const Foam::IMixture*>(this));
     mixture.Einduction_ = this->Einduction;
     mixture.Kinduction_ = this->Kinduction;
-    // Получение необходимого - Edissociation - molWeight - Hchemical
+    // Получение необходимого - Edissociation - Hchemical - MolWeight
     mixture.Edissociation_ = this->Edissociation;
-    mixture.MolWeight_ = this->MolWeight_.primitiveField() [celli];
-    mixture.Hchemical_ = Hchemical(Induction, mixture.MolWeight_);
+    mixture.Hchemical_ = Hchemical(Induction, MolWeight);
+	mixture.MolWeight_ = MolWeight;
     return mixture;
 }
 
 template<class ThermoType>
 const ThermoType & Foam::RDEMixtureExtension<ThermoType>::patchFaceMixture(const Foam::label patchi, const Foam::label facei) const
 {
-    const Foam::IMixture * Mixture = dynamic_cast<const Foam::IMixture*>(this);
     // mixture - одна универсальная переменная
     const ThermoType & mixture = Foam::multiComponentMixture<ThermoType>::patchFaceMixture(patchi, facei);
     // Induction - индукция масса текущей ячейки
-    const Foam::scalar Induction = this->Induction_.boundaryField()[patchi][facei];
-    mixture.Mixture = const_cast<Foam::IMixture*>(Mixture);
+	Foam::scalar & Induction = const_cast<Foam::volScalarField::Boundary &> (dynamic_cast<const Foam::volScalarField::Boundary &> (this->Induction_.boundaryField())) [patchi][facei];
+    // MolWeight - молекулярная масса текущей ячейки
+    Foam::scalar & MolWeight = const_cast<Foam::volScalarField::Boundary &> (dynamic_cast<const Foam::volScalarField::Boundary &> (this->MolWeight_.boundaryField())) [patchi][facei];
+	
+    mixture.Mixture = const_cast<Foam::IMixture*>(dynamic_cast<const Foam::IMixture*>(this));
     mixture.Einduction_ = this->Einduction;
     mixture.Kinduction_ = this->Kinduction;
-    // Получение необходимого - Edissociation - molWeight - Hchemical
+    // Получение необходимого - Edissociation - Hchemical - MolWeight
     mixture.Edissociation_ = this->Edissociation;
-    mixture.MolWeight_ = this->MolWeight_.boundaryField() [patchi][facei];
-    mixture.Hchemical_ = Hchemical(Induction, mixture.MolWeight_);
+	mixture.Hchemical_ = Hchemical(Induction, mixture.MolWeight_);
+    mixture.MolWeight_ = MolWeight;
     return mixture;
 }
 
@@ -194,14 +198,12 @@ template<class ThermoType>
 const ThermoType & Foam::RDEMixtureExtension<ThermoType>::cellT(scalar & Tout, const label celli, const scalar Hpotential, const scalar rho, const scalar Pav)const
 {
     const ThermoType & mixture = cellMixture(celli);
-    // MolWeight - молекулярная масса текущей ячейки
-    Foam::scalar & molWeight = const_cast<Foam::volScalarField::FieldType &> (dynamic_cast<const Foam::volScalarField::FieldType &> (this->MolWeight_.primitiveField())) [celli];
     // Induction - индукция масса текущей ячейки
-    const Foam::scalar Induction = this->Induction_[celli];
+	Foam::scalar & Induction = const_cast<Foam::volScalarField::FieldType &> (dynamic_cast<const Foam::volScalarField::FieldType &> (this->Induction_.primitiveField())) [celli];
+    // MolWeight - молекулярная масса текущей ячейки
+    Foam::scalar & MolWeight = const_cast<Foam::volScalarField::FieldType &> (dynamic_cast<const Foam::volScalarField::FieldType &> (this->MolWeight_.primitiveField())) [celli];
     //
-    Foam::scalar molWeightout;
-    SetWeightAndT(mixture, Hpotential, rho, Pav, molWeight, Induction, molWeightout, Tout);
-    molWeight = molWeightout;
+    SetWeightAndT(mixture, Hpotential, rho, Pav, Induction, MolWeight, Tout);
     return mixture;
 }
 
@@ -209,14 +211,12 @@ template<class ThermoType>
 const ThermoType & Foam::RDEMixtureExtension<ThermoType>::patchFaceT(scalar & Tout, const Foam::label patchi, const Foam::label facei, const scalar Hpotential, const scalar rho, const scalar Pav) const
 {
     const ThermoType & mixture = patchFaceMixture(patchi, facei);
-    // MolWeight - молекулярная масса текущей ячейки
-    Foam::scalar & molWeight = const_cast<Foam::volScalarField::Boundary &> (dynamic_cast<const Foam::volScalarField::Boundary &> (this->MolWeight_.boundaryField())) [patchi][facei];
     // Induction - индукция масса текущей ячейки
-    const Foam::scalar Induction = this->Induction_.boundaryField()[patchi][facei];
+	Foam::scalar & Induction = const_cast<Foam::volScalarField::Boundary &> (dynamic_cast<const Foam::volScalarField::Boundary &> (this->Induction_.boundaryField())) [patchi][facei];
+    // MolWeight - молекулярная масса текущей ячейки
+    Foam::scalar & MolWeight = const_cast<Foam::volScalarField::Boundary &> (dynamic_cast<const Foam::volScalarField::Boundary &> (this->MolWeight_.boundaryField())) [patchi][facei];
     //
-    Foam::scalar molWeightout;
-    SetWeightAndT(mixture, Hpotential, rho, Pav, molWeight, Induction, molWeightout, Tout);
-    molWeight = molWeightout;
+    SetWeightAndT(mixture, Hpotential, rho, Pav, Induction, MolWeight, Tout);
     return mixture;
 }
 
@@ -274,17 +274,16 @@ Foam::ChemistryElement Foam::RDEMixtureExtension<ThermoType>::GetFromHchemical(c
 
 
 template<class ThermoType>
-inline void Foam::RDEMixtureExtension<ThermoType>::SetWeightAndT(const ThermoType & mixture, const scalar Hpotential, const scalar rho, const scalar Pav, scalar molWeight, const scalar Induction, scalar & molWeightout, scalar & Tout)const
+inline void Foam::RDEMixtureExtension<ThermoType>::SetWeightAndT(const ThermoType & mixture, const scalar Hpotential, const scalar rho, const scalar Pav, scalar & Induction, scalar & MolWeight, scalar & T)const
 {
     Foam::scalar Hthermodinamical, Hchemical;
-    //if(molWeight < MolWeightStar) molWeight = MolWeightStar;
-    mixture.MolWeight_ = molWeight;
-    Foam::scalar Tav = Pav*molWeight/rho/Foam::constant::thermodynamic::RR;
+    mixture.MolWeight_ = MolWeight;
+    Foam::scalar Tav = Pav*MolWeight/rho/Foam::constant::thermodynamic::RR;
     if(Tav < Tmin) Tav = Tmin;
     // Вычисление новой молярной массы
     /*if(Induction > Foam::SMALL)
     {
-        molWeight = GetMolWeightFromInduction(Induction);
+        MolWeight = GetMolWeightFromInduction(Induction);
         Hchemical = GetHchemicalFromInduction(Induction);
         Hthermodinamical = Hpotential - Hchemical;
         if(Hthermodinamical < 0.0) Hthermodinamical = mixture.Hs(Pav, Tav); // Примерно определяем термодинамическую часть энтальпии
@@ -294,75 +293,22 @@ inline void Foam::RDEMixtureExtension<ThermoType>::SetWeightAndT(const ThermoTyp
         //---------------------------------------------------------
         // Зная сумму и термодинамичекую часть энтальпии, определяемя химическую часть энтальпии
         Hchemical = Hpotential - Hthermodinamical;
-        ChemistryElement old = std::make_tuple(Induction, molWeight);
+        ChemistryElement old = std::make_tuple(Induction, MolWeight);
         ChemistryElement element = GetFromHchemical(old, Hchemical);
         CorrectChemistry(element);
-        molWeight = std::get<1>(element);
+        MolWeight = std::get<1>(element);
         // Дубль...
-        Tav = Pav*molWeight/rho/Foam::constant::thermodynamic::RR;
+        Tav = Pav*MolWeight/rho/Foam::constant::thermodynamic::RR;
         Hthermodinamical = mixture.Hs(Pav, Tav); // Примерно определяем термодинамическую часть энтальпии
         Hchemical = Hpotential - Hthermodinamical;
         old = element;
         element = GetFromHchemical(old, Hchemical);
         CorrectChemistry(element);
-        molWeight = std::get<1>(element);
-    }
-    mixture.MolWeight_ = molWeight;
-    // далее ищем температуру методом деления отрезка пополам
-    Foam::scalar a,b,T;
-    a = Tmin;
-    b = this->GetTmax(Hthermodinamical, molWeight);
-    while(abs(a-b)/(a+b) > Foam::SMALL)
-    {
-        T = (a+b)/2.0;
-        if(mixture.Hs(Pav, T) > Hthermodinamical) b = T;
-        else a = T;
-    }
-    T = (a+b)/2.0;
-    //---------------------------------------------------------
-    Foam::Info << ", Hpotential = " << Hpotential << ", Hthermodinamical = " << Hthermodinamical << ", Hchemical = " << Hchemical;
-    molWeightout = molWeight;
-    Tout = T;
-}
-
-
-template<class ThermoType>
-ChemistryElement Foam::RDEMixtureExtension<ThermoType>::CorrectElementAndT(const ThermoType & mixture, const ChemistryElement & old, const scalar Hpotential, const scalar rho, const scalar Pav, const scalar Tav, scalar & Tout)const
-{
-    ChemistryElement Elementout = old;
-    Foam::scalar Induction = std::get<0>(old);
-    Foam::scalar MolWeight = std::get<1>(old);
-    Foam::scalar Hthermodinamical, Hchemical;
-    mixture.MolWeight_ = MolWeight;
-    // Вычисление новой молярной массы
-    /*if(Induction > Foam::SMALL)
-    {
-        MolWeight = GetMolWeightFromInduction(Induction);
-        Hchemical = GetHchemicalFromInduction(Induction);
-        Hthermodinamical = Hpotential - Hchemical;
-        // Примерно определяем термодинамическую часть энтальпии
-        if(Hthermodinamical < 0.0) Hthermodinamical = mixture.Hs(Pav, Tav);
-    }else*/
-    {
-        // Примерно определяем термодинамическую часть энтальпии
-        Hthermodinamical = mixture.Hs(Pav, Tav);
-        // Зная сумму и термодинамичекую часть энтальпии, определяемя химическую часть энтальпии
-        Hchemical = Hpotential - Hthermodinamical;
-        Elementout = GetFromHchemical(old, Hchemical);
-        CorrectChemistry(Elementout);
-        MolWeight = std::get<1>(Elementout);
-        // Дубль...
-        Tav = Pav*MolWeight/rho/Foam::constant::thermodynamic::RR;
-        // Примерно определяем термодинамическую часть энтальпии
-        Hthermodinamical = mixture.Hs(Pav, Tav);
-        Hchemical = Hpotential - Hthermodinamical;
-        Elementout = GetFromHchemical(Elementout, Hchemical);
-        CorrectChemistry(Elementout);
-        MolWeight = std::get<1>(Elementout);
+        MolWeight = std::get<1>(element);
     }
     mixture.MolWeight_ = MolWeight;
     // далее ищем температуру методом деления отрезка пополам
-    Foam::scalar a,b,T;
+    Foam::scalar a,b;
     a = Tmin;
     b = this->GetTmax(Hthermodinamical, MolWeight);
     while(abs(a-b)/(a+b) > Foam::SMALL)
@@ -372,9 +318,8 @@ ChemistryElement Foam::RDEMixtureExtension<ThermoType>::CorrectElementAndT(const
         else a = T;
     }
     T = (a+b)/2.0;
-    Tout = T;
-    std::get<1>(Elementout) = MolWeight;
-    return Elementout;
+    //---------------------------------------------------------
+    Foam::Info << ", Hpotential = " << Hpotential << ", Hthermodinamical = " << Hthermodinamical << ", Hchemical = " << Hchemical;
 }
 
 template<class ThermoType>

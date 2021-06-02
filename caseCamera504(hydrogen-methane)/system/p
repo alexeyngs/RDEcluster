@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3600,1200 font "arial,20"
 #----------------------------------------------------
 set title "Зависимость давления от времени"
 set grid
@@ -10,7 +10,7 @@ set xlabel "t, мсек" font ",18"
 
 # Y
 set ylabel "P, атм" font ",18"
-set format y "%2.2f"
+set format y "%2.0f"
 #set yrange [0:3000] 
 #set format y '%.0s✕10^{%S}' 
 

@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3600,1200 font "arial,20"
 #----------------------------------------------------
 set title "Зависимость температуры от времени"
 set grid
@@ -21,7 +21,7 @@ set style function linespoints
 set style line 1 linetype 1 linecolor rgb "black"
 
 
-plot "../postProcessing/P(t)/0/T" using ($1*1000.0):($2) title "" with lines linetype 1 linecolor "red" linewidth 1
+plot "../postProcessing/point/0/T" using ($1*1000.0):($2) title "" with lines linetype 1 linecolor "red" linewidth 2
 
 #pause -1
 pause mouse
