@@ -75,7 +75,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
             if(TCells[celli] < Tmin)
             {
                 const Foam::point & Position = mesh.C()[celli];
-                Info << "(old THE)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                Foam::Pout << "(old THE)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                 //<<<
                 this->p_[celli] = this->Paverage[celli];
                 if(this->rho_[celli] < 0.0) this->rho_[celli] = this->Rhoaverage[celli];
@@ -92,12 +92,12 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
                 hCells[celli] = Uthermodynamical + Uchemical;
                 //>>>
                 TCells[celli] = mixture.THE(hCells[celli], pCells[celli], TCells[celli]);
-                Info << "(new THE)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                Foam::Pout << "(new THE)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
             }
         }else
         {
             const Foam::point & Position = mesh.C()[celli];
-            Foam::Info << "(old THE U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+            Foam::Pout << "(old THE U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
             //<<<
             this->p_[celli] = this->Paverage[celli];
             if(this->rho_[celli] < 0.0) this->rho_[celli] = this->Rhoaverage[celli];
@@ -115,7 +115,7 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
             hCells[celli] = Uthermodynamical + Uchemical;
             //>>>
             TCells[celli] = mixture.THE(hCells[celli], pCells[celli], TCells[celli]);
-            Foam::Info << "(new THE U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+            Foam::Pout << "(new THE U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
         }
         // Заполнение остальных параметров
         psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
@@ -165,7 +165,7 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
                     /*if(BoundaryT[facei] < Tmin)
                     {
                         const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                        Info << "(old boundary THE)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
+                        Foam::Pout << "(old boundary THE)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
                         //<<<
                         BoundaryP[facei] = this->Paverage.boundaryField()[patchi][facei];
                         if(BoundaryRho[facei] < 0.0) BoundaryRho[facei] = this->Rhoaverage.boundaryField()[patchi][facei];
@@ -182,12 +182,12 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
                         BoundaryHE[facei] = Uthermodynamical + Uchemical;
                         //>>>
                         BoundaryT[facei] = mixture.THE(BoundaryHE[facei], BoundaryP[facei], BoundaryT[facei]);
-                        Info << "(new boundary THE)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
+                        Foam::Pout << "(new boundary THE)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
                     }*/
                 }else
                 {
                     const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                    Info << "(old boundary THE U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                    Foam::Pout << "(old boundary THE U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                     //<<<
                     BoundaryP[facei] = this->Paverage.boundaryField()[patchi][facei];
                     if(BoundaryRho[facei] < 0.0) BoundaryRho[facei] = this->Rhoaverage.boundaryField()[patchi][facei];
@@ -205,7 +205,7 @@ if(BoundaryRho[facei] > 6.0) BoundaryRho[facei] = 6.0;
                     BoundaryHE[facei] = Uthermodynamical + Uchemical;
                     //>>>
                     BoundaryT[facei] = mixture.THE(BoundaryHE[facei], BoundaryP[facei], BoundaryT[facei]);
-                    Info << "(new boundary THE U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                    Foam::Pout << "(new boundary THE U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                 }
                 // Заполнение остальных параметров
                 BoundaryPsi[facei] = mixture.psi(BoundaryP[facei], BoundaryT[facei]);
@@ -238,7 +238,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculategetT()
             if(TCells[celli] < Tmin)
             {
                 const Foam::point & Position = mesh.C()[celli];
-                Info << "(old getT)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                Foam::Pout << "(old getT)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                 //<<<
                 this->p_[celli] = this->Paverage[celli];
                 if(this->rho_[celli] < 0.0) this->rho_[celli] = this->Rhoaverage[celli];
@@ -255,12 +255,12 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculategetT()
                 hCells[celli] = Uthermodynamical + Uchemical;
                 //>>>
                 TCells[celli] = mixture.GetT(hCells[celli] - mixture.Hc(), pCells[celli]);
-                Info << "(new getT)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                Foam::Pout << "(new getT)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
             }
         }else
         {
             const Foam::point & Position = mesh.C()[celli];
-            Foam::Info << "(old getT U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+            Foam::Pout << "(old getT U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
             //<<<
             this->p_[celli] = this->Paverage[celli];
             if(this->rho_[celli] < 0.0) this->rho_[celli] = this->Rhoaverage[celli];
@@ -278,7 +278,7 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
             hCells[celli] = Uthermodynamical + Uchemical;
             //>>>
             TCells[celli] = mixture.GetT(hCells[celli] - mixture.Hc(), pCells[celli]);
-            Foam::Info << "(new getT U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+            Foam::Pout << "(new getT U<0)T < " << Tmin << "K!, p = " << pCells[celli]/101325.0 << "atm, T = " << TCells[celli] << "K, rho = " << rhoCells[celli] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
         }
         // Заполнение остальных параметров
         psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
@@ -328,7 +328,7 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
                     if(BoundaryT[facei] < Tmin)
                     {
                         const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                        Info << "(old boundary getT)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
+                        Foam::Pout << "(old boundary getT)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
                         //<<<
                         BoundaryP[facei] = this->Paverage.boundaryField()[patchi][facei];
                         if(BoundaryRho[facei] < 0.0) BoundaryRho[facei] = this->Rhoaverage.boundaryField()[patchi][facei];
@@ -345,12 +345,12 @@ if(this->rho_[celli] > 6.0) this->rho_[celli] = 6.0;
                         BoundaryHE[facei] = Uthermodynamical + Uchemical;
                         //>>>
                         BoundaryT[facei] = mixture.GetT(Uthermodynamical, BoundaryP[facei]);
-                        Info << "(new boundary getT)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
+                        Foam::Pout << "(new boundary getT)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, mu = " << mixture.W() << ", Position = " << Position << endl;
                     }
                 }else
                 {
                     const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                    Info << "(old boundary getT U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                    Foam::Pout << "(old boundary getT U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                     //<<<
                     BoundaryP[facei] = this->Paverage.boundaryField()[patchi][facei];
                     if(BoundaryRho[facei] < 0.0) BoundaryRho[facei] = this->Rhoaverage.boundaryField()[patchi][facei];
@@ -368,7 +368,7 @@ if(BoundaryRho[facei] > 6.0) BoundaryRho[facei] = 6.0;
                     BoundaryHE[facei] = Uthermodynamical + Uchemical;
                     //>>>
                     BoundaryT[facei] = mixture.GetT(Uthermodynamical, BoundaryP[facei]);
-                    Info << "(new boundary getT U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
+                    Foam::Pout << "(new boundary getT U<0)T < " << Tmin << "K!, p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", mu = " << mixture.W() << ", Position = " << Position << endl;
                 }
                 // Заполнение остальных параметров
                 BoundaryPsi[facei] = mixture.psi(BoundaryP[facei], BoundaryT[facei]);
@@ -534,17 +534,17 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
         if(TCells[celli] < Tmin || rho[celli] < 0.0)
         {
             const Foam::point & Centre = Centres[celli];
-            Foam::Info << "T < " << Tmin << "K!(celli = " << celli << ")Pold = " << pCells[celli]/101325.0 << "atm, Told = " << TCells[celli] <<
+            Foam::Pout << "T < " << Tmin << "K!(celli = " << celli << ")Pold = " << pCells[celli]/101325.0 << "atm, Told = " << TCells[celli] <<
             ", MolWeightold = " << MolWeight[celli] << ", point = " << Centre;
             //-----------------------------------------------------------
             pCells[celli] = Pav.ref()[celli];
             if(rho[celli] < 0.0)
             {
                 rho[celli] = Rhoav.ref()[celli];
-                Foam::Info << "(ERROR! RHO < 0) ";
+                Foam::Pout << "(ERROR! RHO < 0) ";
                 if(rho[celli] < 0.0)
                 {
-                    Foam::Info << "ERROR! RHO < 0 AGAIN!" << Foam::endl;
+                    Foam::Pout << "ERROR! RHO < 0 AGAIN!" << Foam::endl;
                     rho[celli] = rho[celli+1];
                 }
             }
@@ -553,7 +553,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
             //-------------------------------------------------------------
             psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
             rhoCells[celli] = mixture.rho(pCells[celli], TCells[celli]);
-            Info << ", P = " << pCells[celli]/101325.0 << "atm, rho = " << rho[celli] <<
+            Foam::Pout << ", P = " << pCells[celli]/101325.0 << "atm, rho = " << rho[celli] <<
             ", Induction = " << Induction[celli] << ", MolWeight = " << MolWeight[celli] << ", T = " << TCells[celli] << Foam::endl;
         }
     }
@@ -584,7 +584,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
         {
             forAll(pT, facei) if(pT[facei] < Tmin || prho[facei] < 0.0)
             {
-                Foam::Info << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
+                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
                 " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei];
                 //-------------------------------------------------------------
                 pp[facei] = Pav.ref().boundaryFieldRef()[patchi][facei];
@@ -593,7 +593,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
                 //-------------------------------------------------------------
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
-                Foam::Info << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] <<
+                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] <<
                 ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
             }
         }
@@ -602,7 +602,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
             forAll(pT, facei) if(pT[facei] < Tmin || prho[facei] < 0.0)
             {
                 const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                Foam::Info << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
+                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
                 " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei] << ", Position = " << Position;
                 //-------------------------------------------------------------
                 pp[facei] = Pav.ref().boundaryFieldRef()[patchi][facei];
@@ -611,7 +611,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
                 //-------------------------------------------------------------
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
-                Foam::Info << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] << 
+                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] << 
                 ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
             }
         }
@@ -624,7 +624,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
         Foam::scalar T = TCells[celli];
         Foam::scalar P = pCells[celli];
         Foam::scalar rhorho = rho[celli];
-        Foam::Info << "ERROR! AGAIN! celli = " << celli << " T = " << T << " , P = " << P/101325.0 << " , rho = " << rhorho << Foam::endl;
+        Foam::Pout << "ERROR! AGAIN! celli = " << celli << " T = " << T << " , P = " << P/101325.0 << " , rho = " << rhorho << Foam::endl;
     }
     // Проверка на темпетатуру (T < Tmax)
     forAll(TCells, celli)

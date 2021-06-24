@@ -333,9 +333,9 @@ Foam::scalar Foam::RDEMixtureNikolaev<ThermoType>::GetTmax(const Foam::scalar Mo
     Foam::scalar Tbound = Tinert;
     if(Tmax < Tbound-10)
     {
-        Info << "Tmax < " << Tbound << ", Told = " << Tmax;
+        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax;
         Tmax = Tbound;
-        Info << ", Tnew = " << Tmax << endl;
+        Foam::Pout << ", Tnew = " << Tmax << endl;
     }
     return Tmax;
 }

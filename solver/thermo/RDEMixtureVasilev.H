@@ -409,9 +409,9 @@ Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::GetTmax(const Foam::scalar Mol
     Foam::scalar Tbound = Tinert;
     if(Tmax < Tbound-10)
     {
-        Info << "Tmax < " << Tbound << ", Told = " << Tmax << ", MolWeight = " << MolWeight;
+        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax << ", MolWeight = " << MolWeight;
         Tmax = Tbound;
-        Info << ", Tnew = " << Tmax << endl;
+        Foam::Pout << ", Tnew = " << Tmax << endl;
     }
     if(Tmax > 10000.0) Tmax = 10000.0;
     return Tmax;
