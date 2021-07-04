@@ -1,4 +1,4 @@
-const unsigned int NVersion = 85;
+const unsigned int NVersion = 86;
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
 #include "localEulerDdtScheme.H"
@@ -153,6 +153,15 @@ int main(int argc, char * argv[])
             fvm::ddt(rho) + fvc::div(RhoUf)
         );
 
+//<<<<<<<<<<<<<
+forAll(rho, i) if(rho[i] < 0.0)
+{
+    Pout << "@@@rho < 0! rho = " << rho[i] << ", point = " << rho.mesh().points()[i] << ", new rho = ";
+    rho[i] = thermo.Rhoaverage[i];
+    Pout << rho[i] << endl;
+}
+//>>>>>>>>>>>>>
+
         // Уравнение импульса
         solve
         (
@@ -203,7 +212,7 @@ int main(int argc, char * argv[])
         // Контактная граница
         #include "contact/updateContactFields.H"
         MolWeight.correctBoundaryConditions();
-thermo.CorrectChemistry();
+        thermo.CorrectChemistry();
         // Конец создания молярной массы
         rhoMolWeight.ref() = rho*MolWeight;
         rhoMolWeight.boundaryFieldRef() == rho.boundaryField()*MolWeight.boundaryField();

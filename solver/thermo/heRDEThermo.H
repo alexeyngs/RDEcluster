@@ -497,8 +497,9 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectChemistry()
     }
     forAll(MixtureType::Induction_.boundaryFieldRef(), patchi) forAll (MixtureType::Induction_.boundaryFieldRef()[patchi], facei)
     {
-        Foam::scalar & facecell = MixtureType::Induction_.boundaryFieldRef()[patchi][facei];
-        if(facecell < Foam::SMALL) facecell = 0.0;
+        Foam::ChemistryElement Element = std::make_tuple(MixtureType::Induction_.boundaryField()[patchi][facei], MixtureType::MolWeight_.boundaryField()[patchi][facei]);
+        MixtureType::CorrectChemistry(Element);
+        std::tie(MixtureType::Induction_.boundaryFieldRef()[patchi][facei], MixtureType::MolWeight_.boundaryFieldRef()[patchi][facei]) = Element;
     }
 }
 

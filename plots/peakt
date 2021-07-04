@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3200, 1200 font "arial, 20"
 #----------------------------------------------------
 set title "Зависимость пика Неймана от времени"
 set grid

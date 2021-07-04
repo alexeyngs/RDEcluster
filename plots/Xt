@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3200, 1200 font "arial, 20"
 #----------------------------------------------------
 set title "Зависимость положения пика Неймана от времени"
 set grid
@@ -22,7 +22,7 @@ set style function linespoints
 set style line 1 linetype 1 linecolor rgb "black"
 
 
-plot "../data.dat" using ($1*1000.0):($2) title "" with points pointtype 7 ps 1 linecolor "black" linewidth 2
+plot "../data.dat" using ($1*1000.0):($2) title "" with points pointtype 7 pointsize 5 linecolor "black" linewidth 2
 
 #pause -1
 pause mouse

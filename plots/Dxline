@@ -1,4 +1,4 @@
-set terminal wxt size 1600,600 font "arial,18"
+set terminal wxt size 3200, 1200 font "arial, 20"
 #----------------------------------------------------
 set title "Зависимость скорости детонации(км/с) от положения в пространстве"
 set grid
@@ -21,7 +21,7 @@ set style function linespoints
 set style line 1 linetype 1 linecolor rgb "black"
 
 
-plot "../data.dat" using ($2):($4/1000.0) title "" with lines linetype 2 linecolor "black" linewidth 2
+plot "../data.dat" using ($2):($4/1000.0) title "" with lines linetype 2 linecolor "black" linewidth 3
 
 #pause -1
 pause mouse

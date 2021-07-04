@@ -217,15 +217,16 @@ const ThermoType & Foam::RDEMixtureVasilev<ThermoType>::patchFaceT(scalar & Tout
 //<<<<<<<<<<<<<<<<<<<<<<<<
 template<class ThermoType>
 Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::Hchemical(Foam::scalar & Induction, Foam::scalar & MolWeight)const
-{
-    const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
-    return this->Edissociation*(1.0/MolWeight - 1.0/this->MolWeightMin) + Hdelta*Psi; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+{    
     if(Induction > Foam::SMALL)
     {
+        const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
+//return this->Edissociation*(1.0/MolWeight - 1.0/this->MolWeightMin) + Hdelta*Psi;
         MolWeight = GetMolWeightFromInductionVasilev(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
         return GetHchemicalFromInductionVasilev(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
     }else
     {
+        const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
         return this->Edissociation*(1.0/MolWeight - 1.0/this->MolWeightMin) + Hdelta*Psi;
     }
 }
@@ -311,7 +312,7 @@ inline void Foam::RDEMixtureVasilev<ThermoType>::SetWeightAndT(const ThermoType 
     }
     T = (a+b)/2.0;
     //---------------------------------------------------------
-    Foam::Info << ", Hpotential = " << Hpotential << ", Hthermodinamical = " << Hthermodinamical << ", Hchemical = " << Hchemical;
+    //Foam::Pout << ", Hpotential = " << Hpotential << ", Hthermodinamical = " << Hthermodinamical << ", Hchemical = " << Hchemical;
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>
@@ -413,7 +414,7 @@ Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::GetTmax(const Foam::scalar Mol
         Tmax = Tbound;
         Foam::Pout << ", Tnew = " << Tmax << endl;
     }
-    if(Tmax > 10000.0) Tmax = 10000.0;
+    if(Tmax > 6000.0) Tmax = 6000.0;
     return Tmax;
 }
 #endif
