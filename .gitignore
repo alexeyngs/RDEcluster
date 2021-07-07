@@ -1,5 +1,13 @@
 RDE.code-workspace
-/.vscode
 .directory
+/.vscode
+/solver/Make/
+/solver/InInclude/
+/solverBC/Make/
+/solverBC/InInclude/
+/solverARRAY/Make/
+/solverARRAY/InInclude/
+/solverARRAYboost/Make/
+/solverARRAYboost/InInclude/
 /docs
 /caseFGV*
