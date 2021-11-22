@@ -370,6 +370,7 @@ void Foam::RDEMixtureVasilev<ThermoType>::CorrectChemistry(ChemistryElement & El
     if(MolWeight < this->MolWeightMin) MolWeight = this->MolWeightMin;
     if(MolWeight > this->MolWeightMax) MolWeight = this->MolWeightMax;
     if(Induction < 0.0) Induction = 0.0;
+    if(Induction > 1.0) Induction = 1.0;
 //    if(Induction > Foam::SMALL)
 //    {
 //        //MolWeight = GetMolWeightFromInductionVasilev<ThermoType>(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
@@ -408,13 +409,13 @@ Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::GetTmax(const Foam::scalar Mol
     const Foam::scalar A = 3.0/4.0*(MolWeight/this->MolWeightA + 1.0); //GetA при T->∞
     Foam::scalar Tmax = Uthermodinamical / A / R;
     Foam::scalar Tbound = Tinert;
-    if(Tmax < Tbound-10)
+    if(Tmax < Tbound)
     {
-        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax << ", MolWeight = " << MolWeight;
+//        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax << ", MolWeight = " << MolWeight;
         Tmax = Tbound;
-        Foam::Pout << ", Tnew = " << Tmax << endl;
+//        Foam::Pout << ", Tnew = " << Tmax << endl;
     }
-    if(Tmax > 6000.0) Tmax = 6000.0;
+//    if(Tmax > 6000.0) Tmax = 6000.0;
     return Tmax;
 }
 #endif

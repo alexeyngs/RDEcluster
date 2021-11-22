@@ -331,11 +331,11 @@ Foam::scalar Foam::RDEMixtureNikolaev<ThermoType>::GetTmax(const Foam::scalar Mo
     const Foam::scalar A = 3.0/4.0*(MolWeight/this->MolWeightA + 1.0); //GetA при T->∞
     Foam::scalar Tmax = Uthermodinamical / A / R;
     Foam::scalar Tbound = Tinert;
-    if(Tmax < Tbound-10)
+    if(Tmax < Tbound)
     {
-        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax;
+//        Foam::Pout << "Tmax < " << Tbound << ", Told = " << Tmax;
         Tmax = Tbound;
-        Foam::Pout << ", Tnew = " << Tmax << endl;
+//        Foam::Pout << ", Tnew = " << Tmax << endl;
     }
     return Tmax;
 }

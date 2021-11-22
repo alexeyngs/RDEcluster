@@ -1,4 +1,4 @@
-const unsigned int NVersion = 86;
+const unsigned int NVersion = 88;
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
 #include "localEulerDdtScheme.H"
@@ -135,9 +135,7 @@ int main(int argc, char * argv[])
             Foam::Info << "deltaT corrected, = " <<  runTime.deltaTValue() << Foam::endl;
         }
         Courant = (mag(U) + c)*runTime.deltaT() / hdelta;
-        Foam::Info << "begin" << Foam::endl;
         CoNum = max(Courant).value();
-        Foam::Info << "end" << Foam::endl;
         Foam::Info << "Courant Number = " << CoNum << Foam::endl;
         Foam::Info << "Iterator = " << iter << Foam::endl;
         //>>>>>>>>>>>>>>>>>>>>>>>>
