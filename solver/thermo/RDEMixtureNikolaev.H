@@ -55,6 +55,7 @@ Foam::RDEMixtureBasic<ThermoType>(thermoDict, mesh, phaseName)
     Foam::Info << "Edissociation = " << this->Edissociation/1000.0 << " J/mol (" << this->Edissociation/KiloCalorie/1000.0 << " Kcal/mol)" <<  Foam::endl;
     Foam::Info << "Sigma = " << this->Sigma << Foam::endl;
     Foam::Info << "MolWeight0 = " << this->MolWeight0 << ", MolWeightA = " << this->MolWeightA << ", MolWeightMin = " << this->MolWeightMin << ", MolWeightMax = " << this->MolWeightMax << Foam::endl;
+	Foam::Info << "CompareWeight = " << this->CompareWeight << Foam::endl;
     Foam::RDEMixtureBasic<ThermoType>::CalculateCJ();
     //-----------------------------------------------------------------
     forAll(multiComponentMixture<ThermoType>::speciesData(), i)
@@ -250,6 +251,7 @@ void Foam::RDEMixtureNikolaev<ThermoType>::Chemistry(const label celli, const sc
     Foam::scalar & FInduction = this->FInduction_[celli];
     Foam::scalar & MolWeight = this->MolWeight_[celli];
     Foam::scalar & FMolWeight = this->FMolWeight_[celli];
+    const Foam::scalar deltaT = this->MolWeight_.mesh().time().deltaTValue();
     const ThermoType & mixture = Foam::RDEMixtureBasic<ThermoType>::cellMixture(celli);
     const Foam::scalar fuel = mixture.needO()*mixture.moles();                         // Количество атомов кислорода для полного сгорания
     const Foam::scalar Sigma = mixture.W()*mixture.moles();                            // Суммарная масса всей смеси
@@ -282,8 +284,9 @@ void Foam::RDEMixtureNikolaev<ThermoType>::Chemistry(const label celli, const sc
         Foam::scalar FWeight =
             4.0*Kplus*rho*rho/MolWeight * (1.0 - MolWeight/this->MolWeightMax)*(1.0 - MolWeight/this->MolWeightMax) -
             4.0*Kplus*this->CJ_Kminus*rho*(MolWeight/this->MolWeightMin - 1.0)*Foam::pow(T/T0, this->beta/2.0)*Foam::pow(1.0 - Foam::exp(-this->theta/T), this->beta)*Foam::exp(-this->Edissociation/Foam::constant::thermodynamic::RR/T);
-		if(FWeight < -10.0) FWeight = -10.0;
-		FMolWeight = rho*FWeight;
+        //Foam::scalar CompareWeight = (this->MolWeightMax - this->MolWeight0) / deltaT * 0.5;
+	if(FWeight < this->CompareWeight) FWeight = this->CompareWeight;
+	FMolWeight = rho*FWeight;
     }
 }
 

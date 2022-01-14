@@ -50,8 +50,14 @@ Foam::RDEMixtureBasic<ThermoType>(thermoDict, mesh, phaseName)
     // Энергия диссоциации от min до max:
     this->Edissociation = this->Qmax / this->Sigma / (1.0/this->MolWeightMin - 1.0/this->MolWeightMax);
     //-----------------------------------------------------------------
-    Foam::Info << "Edissociation = " << this->Edissociation << " J/mol (" << this->Edissociation/KiloCalorie << " kcal/mol)" << ", Needs atoms(Oxigen) to total dissociate = " << this->fuel << Foam::endl;
-    Foam::Info << "Sigma = " << this->Sigma << ", MolWeight0 = " << this->MolWeight0 << ", MolWeightA = " << this->MolWeightA << ", MolWeightMin = " << this->MolWeightMin << ", MolWeightMax = " << this->MolWeightMax << Foam::endl;
+    Foam::Info << "Needs atoms(Oxigen) to total dissociate = " << this->fuel << Foam::endl;
+    Foam::Info << "Qmax = " << this->Qmax << " J (" << this->Qmax / KiloCalorie << " kcal)" << Foam::endl;
+    Foam::Info << "Edissociation = " << this->Edissociation/1000.0 << " J/mol (" << this->Edissociation/KiloCalorie/1000.0 << " kcal/mol)" <<  Foam::endl;
+    Foam::Info << "Sigma = " << this->Sigma << Foam::endl;
+    Foam::Info << "MolWeight0 = " << this->MolWeight0 << ", MolWeightA = " << this->MolWeightA << ", MolWeightMin = " << this->MolWeightMin << ", MolWeightMax = " << this->MolWeightMax << Foam::endl;
+	Foam::Info << "CompareWeight = " << this->CompareWeight << Foam::endl;
+    Foam::RDEMixtureBasic<ThermoType>::CalculateCJ();
+    //-----------------------------------------------------------------
     forAll(multiComponentMixture<ThermoType>::speciesData(), i)
     {
         multiComponentMixture<ThermoType>::setActive(i);
@@ -319,8 +325,8 @@ void Foam::RDEMixtureEquilibrium<ThermoType>::Chemistry(const label celli, const
         Foam::scalar FWeight =
             4.0*Kplus*rho*rho/MolWeight * (1.0 - MolWeight/this->MolWeightMax)*(1.0 - MolWeight/this->MolWeightMax) - 
             4.0*Kplus*this->CJ_Kminus*rho*(MolWeight/this->MolWeightMin - 1.0)*Foam::pow(T/T0, this->beta/2.0)*Foam::pow(1.0 - Foam::exp(-this->theta/T), this->beta)*Foam::exp(-this->Edissociation/Foam::constant::thermodynamic::RR/T);
-		if(FWeight < -20.0) FWeight = -20.0;
-		FMolWeight = rho*FWeight;
+        if(FWeight < this->CompareWeight) FWeight = this->CompareWeight;
+        FMolWeight = rho*FWeight;
     }
 }
 

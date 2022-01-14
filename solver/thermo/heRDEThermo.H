@@ -39,7 +39,7 @@ public:
     virtual void CorrectChemistry() override;
     virtual void CorrectChemistry(ChemistryElement & Element) override;
     virtual scalar Dcj() override;
-    virtual void CorrectErrors(bool UseChemistry, volScalarField & rho, surfaceScalarField & Rhof, surfaceScalarField & Pf) override;
+    virtual void CorrectErrors(bool UseChemistry, volScalarField & rho) override;
     virtual ChemistryElement GetChemistry(label celli) override;
     virtual void SetChemistry(label celli, const ChemistryElement & Element) override;
     virtual ChemistryElement GetChemistryFromHchemical(const ChemistryElement & old, scalar Hchemical) override;
@@ -72,8 +72,8 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
     forAll(Tcell, celli)
     {
         typename MixtureType::thermoType & mixture = const_cast<typename MixtureType::thermoType &>(this->cellMixture(celli));
-	const Foam::point & Position = mesh.C()[celli];
-	Foam::scalar Uchemical = mixture.Hc();
+        const Foam::point & Position = mesh.C()[celli];
+        Foam::scalar Uchemical = mixture.Hc();
         Foam::scalar Uthermodynamical = hCells[celli] - Uchemical;
         if (Uthermodynamical > 0.0)
         {
@@ -102,7 +102,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
             }
         }else
         {
-            Foam::Pout << "(old THE U<0)T < " << Tmin << "K!, p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", mu = " << mixture.W() << ", Position = " << Position << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << endl;
+            Foam::Pout << "(old THE U<0)T < " << Tmin << "K!, p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", Induction = " << MixtureType::Induction_[celli] << ", MolWeight = " << MixtureType::MolWeight_[celli] << ", Position = " << Position << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << endl;
             //<<<
             pcell[celli] = this->Paverage[celli];
             if(rhocell[celli] < 0.0) rhocell[celli] = this->Rhoaverage[celli];
@@ -120,7 +120,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
             hCells[celli] = Uthermodynamical + Uchemical;
             //>>>
             Tcell[celli] = mixture.THE(hCells[celli], pcell[celli], Tcell[celli]);
-            Foam::Pout << "(new THE U<0)T < " << Tmin << "K!, p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", mu = " << mixture.W() << ", Position = " << Position << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << endl;
+            Foam::Pout << "(new THE U<0)T < " << Tmin << "K!, p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", Induction = " << MixtureType::Induction_[celli] << ", MolWeight = " << MixtureType::MolWeight_[celli] << ", Position = " << Position << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << endl;
         }
         // Заполнение остальных параметров
         psiCells[celli] = mixture.psi(pcell[celli], Tcell[celli]);
@@ -481,7 +481,7 @@ Foam::volScalarField & Foam::heRDEThermo<BasicPsiThermo, MixtureType>::FInductio
 
 template<class BasicPsiThermo, class MixtureType>
 void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::chemistry(const Foam::scalar CameraLength)
-{ 
+{
     const Foam::scalarField & TCells = this->T_.primitiveField();
     const Foam::scalarField & rhoCells = this->rho_.primitiveField();
     const Foam::fvMesh & mesh = this->T_.mesh();
@@ -524,7 +524,7 @@ Foam::scalar Foam::heRDEThermo<BasicPsiThermo, MixtureType>::Dcj()
 }
 
 template<class BasicPsiThermo, class MixtureType>
-void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemistry, Foam::volScalarField & rho, Foam::surfaceScalarField & Rhof, Foam::surfaceScalarField & Pf)
+void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemistry, Foam::volScalarField & rho)
 {
     const Foam::fvMesh & mesh = rho.mesh();
     const Foam::volVectorField & Centres = mesh.C();
@@ -535,21 +535,17 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
     Foam::volScalarField & Induction = this->Induction();
     Foam::scalarField & pCells = this->p_.primitiveFieldRef();
     Foam::scalarField & psiCells = this->psi_.primitiveFieldRef();
-    Foam::tmp<Foam::volScalarField> Pav = fvc::average(Pf);
-    Foam::tmp<Foam::volScalarField> Rhoav = fvc::average(Rhof);
-    // есть варианты fvc::surfaceSum(Pf), fvc::reconstruct(Pf)
     forAll(TCells, celli)
     {
         if(TCells[celli] < Tmin || rho[celli] < 0.0)
         {
             const Foam::point & Centre = Centres[celli];
-            Foam::Pout << "T < " << Tmin << "K!(celli = " << celli << ")Pold = " << pCells[celli]/101325.0 << "atm, Told = " << TCells[celli] <<
-            ", MolWeightold = " << MolWeight[celli] << ", point = " << Centre;
+            Foam::Pout << "T < " << Tmin << "K!(celli = " << celli << ")Pold = " << pCells[celli]/101325.0 << "atm, Told = " << TCells[celli] << ", MolWeightold = " << MolWeight[celli] << ", point = " << Centre;
             //-----------------------------------------------------------
-            pCells[celli] = Pav.ref()[celli];
+            pCells[celli] = this->Paverage[celli];
             if(rho[celli] < 0.0)
             {
-                rho[celli] = Rhoav.ref()[celli];
+                rho[celli] = this->Rhoaverage[celli];
                 Foam::Pout << "(ERROR! RHO < 0) ";
                 if(rho[celli] < 0.0)
                 {
@@ -562,8 +558,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
             //-------------------------------------------------------------
             psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
             rhoCells[celli] = mixture.rho(pCells[celli], TCells[celli]);
-            Foam::Pout << ", P = " << pCells[celli]/101325.0 << "atm, rho = " << rho[celli] <<
-            ", Induction = " << Induction[celli] << ", MolWeight = " << MolWeight[celli] << ", T = " << TCells[celli] << Foam::endl;
+            Foam::Pout << ", P = " << pCells[celli]/101325.0 << "atm, rho = " << rho[celli] << ", Induction = " << Induction[celli] << ", MolWeight = " << MolWeight[celli] << ", T = " << TCells[celli] << Foam::endl;
         }
     }
 
@@ -593,8 +588,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
         {
             forAll(pT, facei) if(pT[facei] < Tmin || prho[facei] < 0.0)
             {
-                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
-                " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei];
+                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei << " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei];
                 //-------------------------------------------------------------
                 pp[facei] = Pav.ref().boundaryFieldRef()[patchi][facei];
                 // установим молярную массу и температуру
@@ -602,8 +596,7 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
                 //-------------------------------------------------------------
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
-                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] <<
-                ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
+                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] << ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
             }
         }
         else*/
@@ -611,22 +604,18 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::CorrectErrors(bool UseChemi
             forAll(pT, facei) if(pT[facei] < Tmin || prho[facei] < 0.0)
             {
                 const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
-                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei <<
-                " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei] << ", Position = " << Position;
+                Foam::Pout << "T < " << Tmin << "K!; BOUNDS: patchi = " << patchi << ", facei = " << facei << " Pold = " << pp[facei]/101325.0 << ", Told = " << pT[facei] << ", MolWeightold = " << pMolWeight[facei] << ", Position = " << Position;
                 //-------------------------------------------------------------
-                pp[facei] = Pav.ref().boundaryFieldRef()[patchi][facei];
+                pp[facei] = this->Paverage.boundaryFieldRef()[patchi][facei];
                 // установим молярную массу и температуру
                 const typename MixtureType::thermoType & mixture = MixtureType::patchFaceT(pT[facei], patchi, facei, phe[facei], prho[facei], pp[facei]);
                 //-------------------------------------------------------------
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
-                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] << 
-                ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
+                Foam::Pout << ", P = " << pp[facei]/101325.0 << "atm, rho = " << prho[facei] << ", Induction = " << pInduction[facei] << ", MolWeight = " << pMolWeight[facei] << ", T = " << pT[facei] << Foam::endl;
             }
         }
     }
-    Pav.clear();
-    Rhoav.clear();
     //-------------------------------------------------------------
     forAll(TCells, celli) if(TCells[celli] < Tmin || pCells[celli] < 0.0 || rho[celli] < 0.0)
     {

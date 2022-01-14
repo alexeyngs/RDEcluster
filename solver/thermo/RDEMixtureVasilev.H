@@ -63,6 +63,7 @@ Foam::RDEMixtureBasic<ThermoType>(thermoDict, mesh, phaseName)
     Foam::Info << "Edissociation = " << this->Edissociation/1000.0 << " J/mol (" << this->Edissociation/KiloCalorie/1000.0 << " kcal/mol)" <<  Foam::endl;
     Foam::Info << "Sigma = " << this->Sigma << ", Hchemical* = "<< this->HchemicalStar << ", Hdelta = " << this->Hdelta << Foam::endl;
     Foam::Info << "MolWeight0 = " << this->MolWeight0 << ", MolWeight* = " << this->MolWeightStar << ", MolWeightA = " << this->MolWeightA << ", MolWeightMin = " << this->MolWeightMin << ", MolWeightMax = " << this->MolWeightMax << Foam::endl;
+	Foam::Info << "CompareWeight = " << this->CompareWeight << Foam::endl;
     Foam::RDEMixtureBasic<ThermoType>::CalculateCJ();
     //-----------------------------------------------------------------
     forAll(multiComponentMixture<ThermoType>::speciesData(), i)
@@ -217,16 +218,14 @@ const ThermoType & Foam::RDEMixtureVasilev<ThermoType>::patchFaceT(scalar & Tout
 //<<<<<<<<<<<<<<<<<<<<<<<<
 template<class ThermoType>
 Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::Hchemical(Foam::scalar & Induction, Foam::scalar & MolWeight)const
-{    
+{
+    const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
     if(Induction > Foam::SMALL)
     {
-        const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
-//return this->Edissociation*(1.0/MolWeight - 1.0/this->MolWeightMin) + Hdelta*Psi;
         MolWeight = GetMolWeightFromInductionVasilev(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
         return GetHchemicalFromInductionVasilev(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
     }else
     {
-        const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
         return this->Edissociation*(1.0/MolWeight - 1.0/this->MolWeightMin) + Hdelta*Psi;
     }
 }
@@ -236,6 +235,7 @@ Foam::ChemistryElement Foam::RDEMixtureVasilev<ThermoType>::GetFromHchemical(con
 {
     Foam::scalar Induction = std::get<0>(old);
     Foam::scalar MolWeight = std::get<1>(old);
+    Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
     // Если старая индукция положительная, то пробуем получить новую индукцию из химической части энтальпии
     /*if(Induction > Foam::SMALL)
     {
@@ -247,13 +247,12 @@ Foam::ChemistryElement Foam::RDEMixtureVasilev<ThermoType>::GetFromHchemical(con
         else
         {
             Induction = 0.0;
-            const Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
             // Вычисление новой молярной массы
             MolWeight = 1.0/((Hchemical - this->Hdelta*Psi)/this->Edissociation + 1.0/this->MolWeightMin);
         }
     }else*/
     {
-        Foam::scalar Psi = (MolWeight < MolWeightStar) ? 1.0 : (MolWeight > this->CJ_MolWeight) ? 0.0 : (1.0/this->CJ_MolWeight - 1.0/MolWeight) / (1.0/this->CJ_MolWeight - 1.0/MolWeightStar);
+	Induction = 0.0;
         // Вычисление новой молярной массы
         MolWeight = 1.0/((Hchemical - this->Hdelta*Psi)/this->Edissociation + 1.0/this->MolWeightMin);
         // дубль...
@@ -280,7 +279,7 @@ inline void Foam::RDEMixtureVasilev<ThermoType>::SetWeightAndT(const ThermoType 
         if(Hthermodinamical < 0.0) Hthermodinamical = mixture.Hs(Pav, Tav); // Примерно определяем термодинамическую часть энтальпии
     }else*/
     {
-//        Induction = 0.0;
+        Induction = 0.0;
         Hthermodinamical = mixture.Hs(Pav, Tav); // Примерно определяем термодинамическую часть энтальпии
         //---------------------------------------------------------
         // Зная сумму и термодинамичекую часть энтальпии, определяемя химическую часть энтальпии
@@ -319,8 +318,6 @@ inline void Foam::RDEMixtureVasilev<ThermoType>::SetWeightAndT(const ThermoType 
 
 
 
-
-
 template<class ThermoType>
 void Foam::RDEMixtureVasilev<ThermoType>::Chemistry(const label celli, const scalar rho, const scalar T)
 {
@@ -328,6 +325,7 @@ void Foam::RDEMixtureVasilev<ThermoType>::Chemistry(const label celli, const sca
     Foam::scalar & FInduction = this->FInduction_[celli];
     Foam::scalar & MolWeight = this->MolWeight_[celli];
     Foam::scalar & FMolWeight = this->FMolWeight_[celli];
+    const Foam::scalar deltaT = this->MolWeight_.mesh().time().deltaTValue();
     //------------------------------------------------------
     // Стадия №1 - задержка воспламенения - уменьшение Induction от 1 до 0
     if(T > this->StartInduction)
@@ -355,8 +353,8 @@ void Foam::RDEMixtureVasilev<ThermoType>::Chemistry(const label celli, const sca
     {
         Foam::scalar FWeight =
             4.0*Kplus*rho*rho/MolWeight * (1.0 - MolWeight/this->MolWeightMax)*(1.0 - MolWeight/this->MolWeightMax) -
-            4.0*Kplus*this->CJ_Kminus*rho*(MolWeight/this->MolWeightMin - 1.0)*Foam::pow(T/T0, this->beta/2.0)*Foam::pow(1.0 - Foam::exp(-this->theta/T), Foam::RDEMixtureBasic<ThermoType>::beta)*Foam::exp(-this->Edissociation/Foam::constant::thermodynamic::RR/T);        
-        if(FWeight < -10.0) FWeight = -10.0;
+            4.0*Kplus*this->CJ_Kminus*rho*(MolWeight/this->MolWeightMin - 1.0)*Foam::pow(T/T0, this->beta/2.0)*Foam::pow(1.0 - Foam::exp(-this->theta/T), Foam::RDEMixtureBasic<ThermoType>::beta)*Foam::exp(-this->Edissociation/Foam::constant::thermodynamic::RR/T);
+        if(FWeight < this->CompareWeight) FWeight = this->CompareWeight;
         FMolWeight = rho*FWeight;
     }
 }
@@ -415,7 +413,7 @@ Foam::scalar Foam::RDEMixtureVasilev<ThermoType>::GetTmax(const Foam::scalar Mol
         Tmax = Tbound;
 //        Foam::Pout << ", Tnew = " << Tmax << endl;
     }
-//    if(Tmax > 6000.0) Tmax = 6000.0;
+    if(Tmax > 6000.0) Tmax = 6000.0;
     return Tmax;
 }
 #endif

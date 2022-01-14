@@ -72,6 +72,7 @@ Foam::RDEMixtureBasic<ThermoType>(thermoDictionary, mesh, phaseName)
     Foam::Info << "Edissociation = " << this->Edissociation/1000.0 << " J/mol (" << this->Edissociation/KiloCalorie/1000.0 << " kcal/mol)" <<  Foam::endl;
     Foam::Info << "Sigma = " << this->Sigma << ", Hchemical* = "<< this->HchemicalStar << ", Hdelta = " << this->Hdelta << Foam::endl;
     Foam::Info << "MolWeight0 = " << this->MolWeight0 << ", MolWeight* = " << this->MolWeightStar << ", MolWeightA = " << this->MolWeightA << ", MolWeightMin = " << this->MolWeightMin << ", MolWeightMax = " << this->MolWeightMax << Foam::endl;
+	Foam::Info << "CompareWeight = " << this->CompareWeight << Foam::endl;
     Foam::RDEMixtureBasic<ThermoType>::CalculateCJ();
     //-----------------------------------------------------------------
     forAll(multiComponentMixture<ThermoType>::speciesData(), i)
@@ -357,7 +358,7 @@ void Foam::RDEMixtureExtension<ThermoType>::Chemistry(const label celli, const s
         Foam::scalar FWeight =
             4.0*Kplus*rho*rho/MolWeight * (1.0 - MolWeight/this->MolWeightMax)*(1.0 - MolWeight/this->MolWeightMax) -
             4.0*Kplus*this->CJ_Kminus*rho*(MolWeight/this->MolWeightMin - 1.0)*Foam::pow(T/T0, this->beta/2.0)*Foam::pow(1.0 - Foam::exp(-this->theta/T), Foam::RDEMixtureBasic<ThermoType>::beta)*Foam::exp(-this->Edissociation/Foam::constant::thermodynamic::RR/T);        
-        if(FWeight < -10.0) FWeight = -10.0;
+        if(FWeight < this->CompareWeight) FWeight = this->CompareWeight;
         FMolWeight = rho*FWeight;
     }
 }

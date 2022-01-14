@@ -56,6 +56,7 @@ public:
     scalar Einduction;          // Энергия активации [Дж/моль]
     scalar Kinduction;          // Константа активации в моль*с/м3
     scalar StartInduction;
+    scalar CompareWeight;
     // CJ
     scalar CJ_D;
     scalar CJ_P;
@@ -186,6 +187,7 @@ Foam::RDEMixtureBasic<ThermoType>::RDEMixtureBasic(const Foam::dictionary & ther
     StartInduction = readScalar(thermoDict.subDict("thermo").lookup("StartInduction"));
     theta = thermoDict.subDict("thermo").lookupOrDefault("theta", 0.0);
     Qmax = thermoDict.subDict("thermo").lookupOrDefault("Qmax", 0.0);
+    CompareWeight = thermoDict.subDict("thermo").lookupOrDefault("CompareWeight", -1.0);
     // Параметры Чепмена-Жуге
     CJ_D = readScalar(thermoDict.subDict("CJ").lookup("D"));
     CJ_P = readScalar(thermoDict.subDict("CJ").lookup("P"));

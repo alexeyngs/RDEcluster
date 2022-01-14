@@ -1,4 +1,4 @@
-const unsigned int NVersion = 88;
+const unsigned int NVersion = 90;
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
 #include "localEulerDdtScheme.H"
@@ -75,11 +75,12 @@ int main(int argc, char * argv[])
     }Foam::Info << Foam::endl;
     Foam::Info << "RDE version-" << NVersion << Foam::endl;
     Foam::Info << "Starting time LOOP!" << Foam::endl;
-    Foam::Info << "==========================================================================================================================" << endl << endl;
+    Foam::Info << "==================================================================================" << endl << endl;
     if(UseChemistry) thermo.chemistry(CameraLength); // Один раз вызовем химию для заполнения правой части
     while (runTime.run())
     {
         BreakDown(thermo, psi, c, gamma, T, rho, U, p, e, MolWeight, Induction, Rholf, Ulf, Plf, Elf, MolWeightlf, Inductionlf, Rhof, Uf, Pf, Ef, Hthermodynamicalf, MolWeightf, Inductionf);
+        // есть варианты fvc::surfaceSum(Pf), fvc::reconstruct(Pf)
         thermo.Paverage = fvc::average(Pf);
         thermo.Rhoaverage = fvc::average(Rhof);
         thermo.Paverage.correctBoundaryConditions();
@@ -113,7 +114,7 @@ int main(int argc, char * argv[])
             // Нахождение температуры
             thermo.correct();
             // Исправление ошибок по температуре
-            thermo.CorrectErrors(UseChemistry, rho, Rhof, Pf);
+            thermo.CorrectErrors(UseChemistry, rho);
             gamma.ref() = thermo.Cp()/thermo.Cv();
             // Скорость звука
             c.ref() = Foam::sqrt(gamma / psi);
@@ -150,15 +151,6 @@ int main(int argc, char * argv[])
         (
             fvm::ddt(rho) + fvc::div(RhoUf)
         );
-
-//<<<<<<<<<<<<<
-forAll(rho, i) if(rho[i] < 0.0)
-{
-    Pout << "@@@rho < 0! rho = " << rho[i] << ", point = " << rho.mesh().points()[i] << ", new rho = ";
-    rho[i] = thermo.Rhoaverage[i];
-    Pout << rho[i] << endl;
-}
-//>>>>>>>>>>>>>
 
         // Уравнение импульса
         solve
@@ -218,7 +210,7 @@ forAll(rho, i) if(rho[i] < 0.0)
         // Нахождение температуры
         thermo.correct();
         // Исправление ошибок по температуре
-        thermo.CorrectErrors(UseChemistry, rho, Rhof, Pf);
+        thermo.CorrectErrors(UseChemistry, rho);
         gamma.ref() = thermo.Cp()/thermo.Cv();
         // Скорость звука
         c.ref() = sqrt(gamma / psi);

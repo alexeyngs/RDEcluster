@@ -41,7 +41,7 @@ public:
     virtual void CorrectChemistry() = 0;
     virtual void CorrectChemistry(ChemistryElement & Element) = 0;
     virtual scalar Dcj() = 0;
-    virtual void CorrectErrors(bool UseChemistry, volScalarField & rho, surfaceScalarField & Rhof, surfaceScalarField & Pf) = 0;
+    virtual void CorrectErrors(bool UseChemistry, volScalarField & rho) = 0;
     virtual ChemistryElement GetChemistry(label celli) = 0;
     virtual void SetChemistry(label celli, const ChemistryElement & Element) = 0;
     virtual ChemistryElement GetChemistryFromHchemical(const ChemistryElement & old, scalar Hchemical) = 0;

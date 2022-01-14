@@ -46,6 +46,7 @@ thermo
     beta 1.5;
     //Kminus 5631.0;
     StartInduction 900.0;
+    CompareWeight -10.0;
 }
 
 CJ
@@ -67,7 +68,7 @@ CH4
         decomposition 4;
         molWeight 16.0;     // Молекулярная масса
         needO 4;            // Количество атомов кислорода, необходимых для полного сжигания этой молекулы
-	    Edissociation -570778.0704;
+        Edissociation -570778.0704;
         Einduction 139001.76;    // Энергия активации [Дж/моль]
         Kinduction 6.0e-9;     // Константа активации в моль*с/м3
         theta 3000;             // Температура возбуждения колебательных степеней свободы
@@ -89,7 +90,7 @@ H2
         decomposition 2;
         molWeight 2.016;
         needO 1;
-	    Edissociation -432345.7152;
+        Edissociation -432345.7152;
         Einduction 71803.62;    // Энергия активации [Дж/моль]
         Kinduction 5.38e-8;     // Константа активации в моль*с/м3
         theta 3000;             // Температура возбуждения колебательных степеней свободы
@@ -110,7 +111,7 @@ O2
         decomposition 2;
         molWeight 32.0;
         needO 0;
-	    Edissociation -493929.3564;
+        Edissociation -493929.3564;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         InductionPower 1.0;     // Показатель степени в концентрации(для задержек воспламенения)
@@ -132,7 +133,7 @@ N2
         decomposition 1;
         molWeight 28.0134;
         needO 0;
-	    Edissociation 0.0;
+        Edissociation 0.0;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         theta 3000;             // Температура возбуждения колебательных степеней свободы
@@ -153,7 +154,7 @@ Ar
         decomposition 1;
         molWeight 39.948;
         needO 0;
-	    Edissociation 0.0;
+        Edissociation 0.0;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         theta 0;             // Температура возбуждения колебательных степеней свободы
@@ -173,8 +174,8 @@ H2O
         atoms 3;
         decomposition 3;
         molWeight 36.0;
-	    needO 0;
-	    Edissociation -918420.6;
+        needO 0;
+        Edissociation -918420.6;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         theta 3500;             // Температура возбуждения колебательных степеней свободы
@@ -195,7 +196,7 @@ CO2
         decomposition 2;
         molWeight 44.0;
         needO 0;
-	    Edissociation -526502.6604;
+        Edissociation -526502.6604;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         theta 1500;             // Температура возбуждения колебательных степеней свободы
@@ -216,7 +217,7 @@ OH
         decomposition 2;
         molWeight 17.0;
         needO 0;
-	    Edissociation -424374.048;
+        Edissociation -424374.048;
         Einduction 0.0;    // Энергия активации [Дж/моль]
         Kinduction 0.0;     // Константа активации в моль*с/м3
         theta 3000;             // Температура возбуждения колебательных степеней свободы

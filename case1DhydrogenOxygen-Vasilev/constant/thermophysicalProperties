@@ -46,6 +46,7 @@ thermo
     beta 1.5;
     //Kminus 3500.0;
     StartInduction 900.0;
+    CompareWeight -10.0;
 }
 
 // Параметры Чепмена-Жуге
