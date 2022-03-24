@@ -4,6 +4,7 @@ set -x
 
 module purge
 module load intel/2019 parallel/mpi.intel.broadwell/2019 compilers/intel/2019
+#module load oneapi/2021.2 oneapi/2021.2/mpi oneapi/2021.2/compilers
 
 
 wmake libso ./solverBC
