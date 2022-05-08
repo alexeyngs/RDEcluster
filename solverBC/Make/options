@@ -1,4 +1,4 @@
-EXE_INC = -g \
+EXE_INC = -g -std=c++17\
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \

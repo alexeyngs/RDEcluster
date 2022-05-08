@@ -369,6 +369,8 @@ void Foam::RDEMixtureVasilev<ThermoType>::CorrectChemistry(ChemistryElement & El
     if(MolWeight > this->MolWeightMax) MolWeight = this->MolWeightMax;
     if(Induction < 0.0) Induction = 0.0;
     if(Induction > 1.0) Induction = 1.0;
+	// Введено для пробы
+	if(Induction < 0.01) Induction = 0.0;
 //    if(Induction > Foam::SMALL)
 //    {
 //        //MolWeight = GetMolWeightFromInductionVasilev<ThermoType>(this->species(), this->speciesData(), Induction, this->powerN, this->Sigma);
