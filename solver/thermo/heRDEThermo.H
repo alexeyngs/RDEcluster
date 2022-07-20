@@ -77,9 +77,10 @@ void Foam::heRDEThermo<BasicPsiThermo, MixtureType>::calculateTHE()
         Foam::scalar Uthermodynamical = hCells[celli] - Uchemical;
         if (Uthermodynamical > 0.0)
         {
-			if(Tcell[celli] < Tmin) Tcell[celli] = Tmin;
+	    if(Tcell[celli] < Tmin) Tcell[celli] = Tmin;
             Tcell[celli] = mixture.THE(hCells[celli], pcell[celli], Tcell[celli]);
-            if(Tcell[celli] < Tmin)
+	    Foam::scalar Tmax = MixtureType::GetTmax(mixture.W(), Uthermodynamical);
+            if(Tcell[celli] < Tmin) // Если меньше минимального значения
             {
         	Foam::Pout << "(old THE T < " << Tmin << "K) p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", Induction = " << MixtureType::Induction_[celli] << ", MolWeight = " << MixtureType::MolWeight_[celli] << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << ", Position = " << Position << endl;
                 //<<<
@@ -105,7 +106,18 @@ if(rhocell[celli] > RhoLimit) rhocell[celli] = RhoLimit;
                 //>>>
                 Tcell[celli] = mixture.THE(hCells[celli], pcell[celli], Tcell[celli]);
                 Foam::Pout << "(new THE T < " << Tmin << "K) p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", Induction = " << MixtureType::Induction_[celli] << ", MolWeight = " << MixtureType::MolWeight_[celli] << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << ", Position = " << Position << Foam::endl << Foam::endl;
-            }
+            }else if(Tcell[celli] > Tmax) // Если больше максимального значения
+	    {
+		Tcell[celli] = Tmax;
+		// Получение нового химического элемента
+		Uchemical = mixture.Hc();
+		std::tie(MixtureType::Induction_[celli], MixtureType::MolWeight_[celli]) = GetChemistryFromHchemical(std::make_tuple(MixtureType::Induction_[celli], MixtureType::MolWeight_[celli]), Uchemical);
+		mixture = this->cellMixture(celli);
+		pcell[celli] = rhocell[celli] * Foam::constant::thermodynamic::RR * Tcell[celli] / mixture.W();
+	    }else
+	    {
+		Tcell[celli] = mixture.THE(hCells[celli], pcell[celli], Tcell[celli]);
+	    }
         }else
         {
             Foam::Pout << "(old THE U < 0) p = " << pcell[celli]/101325.0 << "atm, T = " << Tcell[celli] << "K, rho = " << rhocell[celli] << ", Induction = " << MixtureType::Induction_[celli] << ", MolWeight = " << MixtureType::MolWeight_[celli] << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << ", Position = " << Position << Foam::endl;
@@ -176,10 +188,12 @@ if(rhocell[celli] > RhoLimit) rhocell[celli] = RhoLimit;
                 typename MixtureType::thermoType & mixture = const_cast<typename MixtureType::thermoType &>(this->patchFaceMixture(patchi, facei));
                 Foam::scalar Uchemical = mixture.Hc();
                 Foam::scalar Uthermodynamical = BoundaryHE[facei] - Uchemical;
+		Foam::scalar rhoold = mixture.rho(BoundaryP[facei], BoundaryT[facei]);
                 if(Uthermodynamical > 0.0)
                 {
                     BoundaryT[facei] = mixture.THE(BoundaryHE[facei], BoundaryP[facei], BoundaryT[facei]);
-                    if(BoundaryT[facei] < Tmin)
+		    Foam::scalar Tmax = MixtureType::GetTmax(mixture.W(), Uthermodynamical);
+                    if(BoundaryT[facei] < Tmin) // Если меньше минимального значения
                     {
                         const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
                         Foam::Pout << "(old boundary THE T < " << Tmin << "K) p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", Induction = " << MixtureType::Induction_.boundaryField()[patchi][facei] << ", MolWeight = " << MixtureType::MolWeight_.boundaryField()[patchi][facei] << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << ", Position = " << Position << Foam::endl;
@@ -205,7 +219,15 @@ if(BoundaryRho[facei] > RhoLimit) BoundaryRho[facei] = RhoLimit;
                         //>>>
                         BoundaryT[facei] = mixture.THE(BoundaryHE[facei], BoundaryP[facei], BoundaryT[facei]);
                         Foam::Pout << "(new boundary THE T < " << Tmin << "K) p = " << BoundaryP[facei]/101325.0 << "atm, T = " << BoundaryT[facei] << "K, rho = " << BoundaryRho[facei] << ", Induction = " << MixtureType::Induction_.boundaryField()[patchi][facei] << ", MolWeight = " << MixtureType::MolWeight_.boundaryField()[patchi][facei] << ", Uthermodynamical = " << Uthermodynamical << ", Uchemical = " << Uchemical << ", Position = " << Position << Foam::endl << Foam::endl;
-                    }
+                    }else if(BoundaryT[facei] > Tmax) // Если больше максимального значения
+               	    {
+			BoundaryT[facei] = Tmax;
+			// Получение нового химического элемента
+			Uchemical = mixture.Hc();
+			std::tie(MixtureType::Induction_.boundaryFieldRef()[patchi][facei], MixtureType::MolWeight_.boundaryFieldRef()[patchi][facei]) = GetChemistryFromHchemical(std::make_tuple(MixtureType::Induction_.boundaryField()[patchi][facei], MixtureType::MolWeight_.boundaryField()[patchi][facei]), Uchemical);
+			mixture = this->patchFaceMixture(patchi, facei);
+			BoundaryP[facei] = BoundaryRho[facei] * Foam::constant::thermodynamic::RR * BoundaryT[facei] / mixture.W();
+                    }else BoundaryT[facei] = mixture.THE(BoundaryHE[facei], BoundaryP[facei], BoundaryT[facei]);
                 }else
                 {
                     const Foam::point & Position = mesh.boundary()[patchi].Cf()[facei];
